@@ -290,7 +290,15 @@ void IrkEnrollmentComponent::handle_gatts_event(esp_gatts_cb_event_t event, esp_
           .uuid = {.uuid16 = 0x180A}  // Device Information Service UUID
         };
         
-        esp_err_t ret = esp_ble_gatts_create_service(gatts_if, &device_info_uuid, 10);
+        esp_gatt_srvc_id_t device_info_service_id = {
+          .id = {
+            .uuid = device_info_uuid,
+            .inst_id = 0
+          },
+          .is_primary = true
+        };
+        
+        esp_err_t ret = esp_ble_gatts_create_service(gatts_if, &device_info_service_id, 10);
         if (ret != ESP_OK) {
           ESP_LOGE(TAG, "Failed to create Device Information service: %s", esp_err_to_name(ret));
         } else {
@@ -408,7 +416,15 @@ void IrkEnrollmentComponent::handle_gatts_event(esp_gatts_cb_event_t event, esp_
             .uuid = {.uuid16 = 0x180D}  // Heart Rate Service UUID
           };
           
-          esp_err_t ret = esp_ble_gatts_create_service(gatts_if, &heart_rate_uuid, 10);
+          esp_gatt_srvc_id_t heart_rate_service_id = {
+            .id = {
+              .uuid = heart_rate_uuid,
+              .inst_id = 0
+            },
+            .is_primary = true
+          };
+          
+          esp_err_t ret = esp_ble_gatts_create_service(gatts_if, &heart_rate_service_id, 10);
           if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to create Heart Rate service: %s", esp_err_to_name(ret));
             // Start advertising even if Heart Rate service creation failed
