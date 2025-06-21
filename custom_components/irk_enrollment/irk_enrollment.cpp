@@ -68,7 +68,7 @@ LOG_TEXT_SENSOR(" ", "Latest IRK", this->latest_irk_);
 }
 
 void IrkEnrollmentComponent::loop() {
-ESP_LOGD(TAG, "In our loop");
+//ESP_LOGD(TAG, "In our loop");
 this->process_bonded_devices();
 }
 
