@@ -17,45 +17,33 @@ external_components:
 Add the following to your ESPHome configuration:
 
 ```yaml
-# Enable BLE functionality with iOS-friendly settings
+# Enable BLE functionality
 esp32_ble:
-  advertising: true
-  scan_parameters:
-    active: true
-  advertising_parameters:
-    min_interval: 20ms  # 0x0020 in hex (faster advertising)
-    max_interval: 40ms  # 0x0040 in hex
-  # iOS-friendly configuration
-  manufacturer_data:
-    - manufacturer_id: 0xFFFF  # Generic manufacturer ID
-      data: [0x01, 0x02]
-  service_data:
-    - uuid: 0x180D  # Heart Rate Service
-      data: [0x00, 0x01]
-  service_uuids:
-    - 0x180D  # Heart Rate Service
-  appearance: 0x0341  # Heart Rate Sensor
-  security:
-    auth: BOND  # Enable bonding
-    io_capability: NO_INPUT_NO_OUTPUT
-    encryption: MITM  # Enable MITM protection
+  # Set IO capability for pairing
+  io_capability: keyboard_only
 
-# Enable BLE server functionality
+# Enable BLE server
 esp32_ble_server:
+  # Set device appearance to Heart Rate Sensor for better iOS visibility
+  appearance: 0x0341
+  # Add manufacturer data for better iOS visibility
+  manufacturer_data: [0xFF, 0xFF, 0x01, 0x02]
+  # Define BLE services
   services:
     - uuid: 0x180D  # Heart Rate Service
       characteristics:
         - uuid: 0x2A37  # Heart Rate Measurement
-          properties: READ | NOTIFY
+          read: true
+          notify: true
           value: "0600"  # Initial value (flags + heart rate)
     
     - uuid: 0x180A  # Device Information Service
       characteristics:
         - uuid: 0x2A29  # Manufacturer Name
-          properties: READ
+          read: true
           value: "ESPHome"
         - uuid: 0x2A24  # Model Number
-          properties: READ
+          read: true
           value: "IRK Collector"
 
 # Add the IRK enrollment component

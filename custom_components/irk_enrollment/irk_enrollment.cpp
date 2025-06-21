@@ -1,5 +1,6 @@
 #include "irk_enrollment.h"
 #include "esphome/core/log.h"
+#include "esphome/core/application.h"
 #include "esphome/components/esp32_ble_server/ble_server.h"
 
 #ifdef USE_ESP32
@@ -28,7 +29,7 @@ void IrkEnrollmentComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up IRK Enrollment Component");
   
   // Get a reference to the BLE server component
-  auto *ble_server = App.get_ble_server();
+  auto *ble_server = App.get_app_component<esp32_ble_server::BLEServer>();
   if (ble_server == nullptr) {
     ESP_LOGE(TAG, "BLE server not found! Make sure you've configured the esp32_ble_server component.");
     this->mark_failed();
