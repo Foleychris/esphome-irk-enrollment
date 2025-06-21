@@ -90,7 +90,7 @@ ESP_LOGI(TAG, "    remote BD_ADDR: %08x%04x",
 (bond_devs[i].bd_addr[2] << 8) + bond_devs[i].bd_addr[3],
 (bond_devs[i].bd_addr[4] << 8) + bond_devs[i].bd_addr[5]);
 
-```
+
 auto irkStr = hexStr((unsigned char *) &bond_devs[i].bond_key.pid_key.irk, 16);
 ESP_LOGI(TAG, "      irk: %s", irkStr.c_str());
 
@@ -101,7 +101,7 @@ if (this->latest_irk_ != nullptr && this->latest_irk_->get_state() != irkStr) {
 esp_ble_gap_disconnect(bond_devs[i].bd_addr);
 esp_ble_remove_bond_device(bond_devs[i].bd_addr);
 ESP_LOGI(TAG, "  Disconnected and removed bond");
-```
+
 
 }
 }
