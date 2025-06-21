@@ -53,11 +53,41 @@ instance_ = this;
     ESP_LOGE(TAG, "Failed to register GATTS callback: %s", esp_err_to_name(gatts_ret));
     return;
   }
-
+  esp_ble_gatts_app_register(0);
+ // Setup BLE security and advertising
+  this->setup_advertising();
 // Setup BLE security parameters
 this->setup_ble_security();
 
 delay(200);  // NOLINT
+}
+void IrkEnrollmentComponent::setup_advertising() {
+  esp_ble_adv_data_t adv_data = {};
+  adv_data.set_scan_rsp = false;
+  adv_data.include_name = true;
+  adv_data.include_txpower = true;
+  adv_data.min_interval = 0x0006; // 7.5ms
+  adv_data.max_interval = 0x0010; // 20ms
+  adv_data.appearance = 0x00;
+  adv_data.manufacturer_len = 0;
+  adv_data.p_manufacturer_data = nullptr;
+  adv_data.service_data_len = 0;
+  adv_data.p_service_data = nullptr;
+  adv_data.service_uuid_len = 0;
+  adv_data.p_service_uuid = nullptr;
+  adv_data.flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
+
+  esp_ble_gap_config_adv_data(&adv_data);
+
+  esp_ble_adv_params_t adv_params = {};
+  adv_params.adv_int_min = 0x20;
+  adv_params.adv_int_max = 0x40;
+  adv_params.adv_type = ADV_TYPE_IND;
+  adv_params.own_addr_type = BLE_ADDR_TYPE_PUBLIC;
+  adv_params.channel_map = ADV_CHNL_ALL;
+  adv_params.adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY;
+
+  esp_ble_gap_start_advertising(&adv_params);
 }
 
 void IrkEnrollmentComponent::setup_ble_security() {
