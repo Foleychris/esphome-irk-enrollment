@@ -6,6 +6,13 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/preferences.h"
 #include "esphome/components/text_sensor/text_sensor.h"
+#include "esphome/components/esp32_ble/ble.h"
+#include "esphome/components/esp32_ble/ble_advertising.h"
+#include "esphome/components/esp32_ble/ble_uuid.h"
+#include "esphome/components/esp32_ble/queue.h"
+#include "esphome/components/esp32_ble_server/ble_service.h"
+#include "esphome/components/esp32_ble_server/ble_server.h"
+#include "esphome/components/esp32_ble_server/ble_characteristic.h"
 
 #ifdef USE_ESP32
 
