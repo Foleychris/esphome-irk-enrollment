@@ -42,7 +42,15 @@ text_sensor::TextSensor *latest_irk_{nullptr};
 // BLE service configuration
 void setup_ble_security();
 void setup_advertising();
+void setup_gatt_server();
 void process_bonded_devices();
+
+// GATT server attributes
+uint16_t device_info_handle_{0};
+uint16_t manufacturer_name_handle_{0};
+uint16_t model_number_handle_{0};
+uint16_t heart_rate_handle_{0};
+uint16_t heart_rate_measurement_handle_{0};
 
 // Static callback wrappers
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
