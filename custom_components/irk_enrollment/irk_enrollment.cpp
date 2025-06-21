@@ -79,69 +79,70 @@ ESP_LOGW(TAG, "We have %d bonds, where we expect to only ever have 0 or 1", dev_
 }
 
 if (dev_num == 0) {
-return;  // No bonded devices
+  ESP_LOGD(TAG, "No devices, returning");
+  return;  // No bonded devices
 }
 
 esp_ble_bond_dev_t bond_devs[dev_num];
 esp_ble_get_bond_device_list(&dev_num, bond_devs);
 
 for (int i = 0; i < dev_num; i++) {
-ESP_LOGI(TAG, "    remote BD_ADDR: %08x%04x",
-(bond_devs[i].bd_addr[0] << 24) + (bond_devs[i].bd_addr[1] << 16) +
-(bond_devs[i].bd_addr[2] << 8) + bond_devs[i].bd_addr[3],
-(bond_devs[i].bd_addr[4] << 8) + bond_devs[i].bd_addr[5]);
+  ESP_LOGI(TAG, "    remote BD_ADDR: %08x%04x",
+  (bond_devs[i].bd_addr[0] << 24) + (bond_devs[i].bd_addr[1] << 16) +
+  (bond_devs[i].bd_addr[2] << 8) + bond_devs[i].bd_addr[3],
+  (bond_devs[i].bd_addr[4] << 8) + bond_devs[i].bd_addr[5]);
 
 
-auto irkStr = hexStr((unsigned char *) &bond_devs[i].bond_key.pid_key.irk, 16);
-ESP_LOGI(TAG, "      irk: %s", irkStr.c_str());
+  auto irkStr = hexStr((unsigned char *) &bond_devs[i].bond_key.pid_key.irk, 16);
+  ESP_LOGI(TAG, "      irk: %s", irkStr.c_str());
 
-if (this->latest_irk_ != nullptr && this->latest_irk_->get_state() != irkStr) {
-  this->latest_irk_->publish_state(irkStr);
-}
+  if (this->latest_irk_ != nullptr && this->latest_irk_->get_state() != irkStr) {
+    this->latest_irk_->publish_state(irkStr);
+  }
 
-esp_ble_gap_disconnect(bond_devs[i].bd_addr);
-esp_ble_remove_bond_device(bond_devs[i].bd_addr);
-ESP_LOGI(TAG, "  Disconnected and removed bond");
+  esp_ble_gap_disconnect(bond_devs[i].bd_addr);
+  esp_ble_remove_bond_device(bond_devs[i].bd_addr);
+  ESP_LOGI(TAG, "  Disconnected and removed bond");
 
 
-}
+  }
 }
 
 float IrkEnrollmentComponent::get_setup_priority() const {
-return setup_priority::AFTER_BLUETOOTH;
+  return setup_priority::AFTER_BLUETOOTH;
 }
 
 // Static callback wrappers
 void IrkEnrollmentComponent::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
-if (instance_ != nullptr) {
-instance_->handle_gap_event(event, param);
-}
+  if (instance_ != nullptr) {
+    instance_->handle_gap_event(event, param);
+  }
 }
 
 void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
-if (instance_ != nullptr) {
-instance_->handle_gatts_event(event, gatts_if, param);
-}
+  if (instance_ != nullptr) {
+    instance_->handle_gatts_event(event, gatts_if, param);
+  }
 }
 
 // Instance event handlers
 void IrkEnrollmentComponent::handle_gap_event(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
-switch (event) {
-case ESP_GAP_BLE_KEY_EVT:
-// shows the ble key info share with peer device to the user.
-// ESP_LOGI(TAG, "key type = %s", esp_key_type_to_str(param->ble_security.ble_key.key_type));
-break;
-case ESP_GAP_BLE_SEC_REQ_EVT:
-esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
-break;
-case ESP_GAP_BLE_AUTH_CMPL_EVT: {
-// Authentication complete event
-// You can add additional logging here if needed
-break;
-}
-default:
-break;
-}
+  switch (event) {
+    case ESP_GAP_BLE_KEY_EVT:
+      // shows the ble key info share with peer device to the user.
+      // ESP_LOGI(TAG, "key type = %s", esp_key_type_to_str(param->ble_security.ble_key.key_type));
+      break;
+    case ESP_GAP_BLE_SEC_REQ_EVT:
+      esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
+      break;
+    case ESP_GAP_BLE_AUTH_CMPL_EVT: {
+    // Authentication complete event
+    // You can add additional logging here if needed
+      break;
+    }
+    default:
+      break;
+  }
 }
 
 void IrkEnrollmentComponent::handle_gatts_event(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
