@@ -114,13 +114,13 @@ float IrkEnrollmentComponent::get_setup_priority() const {
 }
 
 // Static callback wrappers
-void IrkEnrollmentComponent::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+static void IrkEnrollmentComponent::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
   if (instance_ != nullptr) {
     instance_->handle_gap_event(event, param);
   }
 }
 
-void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
+static void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
   if (instance_ != nullptr) {
     instance_->handle_gatts_event(event, gatts_if, param);
   }
@@ -152,10 +152,7 @@ void IrkEnrollmentComponent::handle_gatts_event(esp_gatts_cb_event_t event, esp_
       // start security connect with peer device when receive the connect event sent by the master.
       esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
       ESP_LOGD(TAG, "BLE device connected, starting encryption");
-      break;
-    case ESP_GAP_BLE_SEC_REQ_EVT:
-      esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
-      break;        
+      break;    
     default:
       break;
   }
