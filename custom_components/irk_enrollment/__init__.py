@@ -3,16 +3,16 @@ import esphome.config_validation as cv
 from esphome.components import esp32_ble_server, text_sensor
 from esphome.const import CONF_ID
 
-AUTO_LOAD = [“esp32_ble_server”, “text_sensor”]
-CODEOWNERS = [”@dgrnbrg”]
-CONFLICTS_WITH = [“esp32_ble_beacon”]
-DEPENDENCIES = [“esp32”, “text_sensor”]
+AUTO_LOAD = ["esp32_ble_server", "text_sensor"]
+CODEOWNERS = ["@dgrnbrg"]
+CONFLICTS_WITH = ["esp32_ble_beacon"]
+DEPENDENCIES = ["esp32", "text_sensor"]
 
-CONF_LATEST_IRK = “latest_irk”
+CONF_LATEST_IRK = "latest_irk"
 
-irk_enrollment_ns = cg.esphome_ns.namespace(“irk_enrollment”)
+irk_enrollment_ns = cg.esphome_ns.namespace("irk_enrollment")
 IrkEnrollmentComponent = irk_enrollment_ns.class_(
-“IrkEnrollmentComponent”,
+"IrkEnrollmentComponent",
 cg.Component,
 )
 
@@ -20,7 +20,7 @@ CONFIG_SCHEMA = cv.Schema(
 {
 cv.GenerateID(): cv.declare_id(IrkEnrollmentComponent),
 cv.Optional(CONF_LATEST_IRK): text_sensor.text_sensor_schema(
-icon=“mdi:cellphone-key”,
+icon="mdi:cellphone-key",
 ),
 }
 ).extend(cv.COMPONENT_SCHEMA)
