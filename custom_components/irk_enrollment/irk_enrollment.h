@@ -41,6 +41,7 @@ text_sensor::TextSensor *latest_irk_{nullptr};
 
 // BLE service configuration
 void setup_ble_security();
+void setup_advertising();
 void process_bonded_devices();
 
 // Static callback wrappers
