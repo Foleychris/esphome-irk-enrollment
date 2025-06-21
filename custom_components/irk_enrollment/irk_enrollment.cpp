@@ -54,40 +54,57 @@ instance_ = this;
     return;
   }
   esp_ble_gatts_app_register(0);
- // Setup BLE security and advertising
-  this->setup_advertising();
 // Setup BLE security parameters
 this->setup_ble_security();
 
 delay(200);  // NOLINT
 }
 void IrkEnrollmentComponent::setup_advertising() {
+  // First configure advertising data
   esp_ble_adv_data_t adv_data = {};
   adv_data.set_scan_rsp = false;
   adv_data.include_name = true;
-  adv_data.include_txpower = true;
-  adv_data.min_interval = 0x0006; // 7.5ms
-  adv_data.max_interval = 0x0010; // 20ms
-  adv_data.appearance = 0x00;
+  adv_data.include_txpower = false;  // Changed to false
+  adv_data.min_interval = 0x0006;
+  adv_data.max_interval = 0x0010;
+  adv_data.appearance = 0x03C1;  // Generic HID Device
   adv_data.manufacturer_len = 0;
   adv_data.p_manufacturer_data = nullptr;
   adv_data.service_data_len = 0;
   adv_data.p_service_data = nullptr;
-  adv_data.service_uuid_len = 0;
-  adv_data.p_service_uuid = nullptr;
+  
+  // Add a service UUID to make it more discoverable
+  uint16_t service_uuid = 0x1812;  // HID Service
+  adv_data.service_uuid_len = sizeof(uint16_t);
+  adv_data.p_service_uuid = (uint8_t*)&service_uuid;
+  
   adv_data.flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
 
-  esp_ble_gap_config_adv_data(&adv_data);
+  esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to config adv data: %s", esp_err_to_name(ret));
+    return;
+  }
 
+  // Set device name
+  esp_ble_gap_set_device_name("IRK Collector");
+
+  // Configure advertising parameters
   esp_ble_adv_params_t adv_params = {};
-  adv_params.adv_int_min = 0x20;
-  adv_params.adv_int_max = 0x40;
+  adv_params.adv_int_min = 0x100;  // Slower advertising (100ms)
+  adv_params.adv_int_max = 0x200;  // to 200ms
   adv_params.adv_type = ADV_TYPE_IND;
   adv_params.own_addr_type = BLE_ADDR_TYPE_PUBLIC;
   adv_params.channel_map = ADV_CHNL_ALL;
   adv_params.adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY;
 
-  esp_ble_gap_start_advertising(&adv_params);
+  // Start advertising
+  ret = esp_ble_gap_start_advertising(&adv_params);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to start advertising: %s", esp_err_to_name(ret));
+  } else {
+    ESP_LOGI(TAG, "Started BLE advertising");
+  }
 }
 
 void IrkEnrollmentComponent::setup_ble_security() {
@@ -167,32 +184,45 @@ void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp
 
 // Instance event handlers
 void IrkEnrollmentComponent::handle_gap_event(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+  ESP_LOGI(TAG, "GAP event: %d", event);
   switch (event) {
+    case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
+      ESP_LOGI(TAG, "Advertising data set complete");
+      // Start advertising after data is set
+      break;
+    case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+      ESP_LOGI(TAG, "Advertising start complete");
+      break;
     case ESP_GAP_BLE_KEY_EVT:
-      // shows the ble key info share with peer device to the user.
-      // ESP_LOGI(TAG, "key type = %s", esp_key_type_to_str(param->ble_security.ble_key.key_type));
+      ESP_LOGI(TAG, "BLE key exchange event");
       break;
     case ESP_GAP_BLE_SEC_REQ_EVT:
+      ESP_LOGI(TAG, "BLE security request event - responding with accept");
       esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
       break;
-    case ESP_GAP_BLE_AUTH_CMPL_EVT: {
-    // Authentication complete event
-    // You can add additional logging here if needed
+    case ESP_GAP_BLE_AUTH_CMPL_EVT:
+      ESP_LOGI(TAG, "BLE authentication complete - success: %s", 
+               param->ble_security.auth_cmpl.success ? "true" : "false");
       break;
-    }
     default:
+      ESP_LOGD(TAG, "Unhandled GAP event: %d", event);
       break;
   }
 }
 
 void IrkEnrollmentComponent::handle_gatts_event(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
+  ESP_LOGI(TAG, "GATTS event received: %d", event);
   switch (event) {
+    case ESP_GATTS_REG_EVT:
+      ESP_LOGI(TAG, "GATTS app registered - starting advertising");
+      this->setup_advertising();  // Start advertising here
+      break;
     case ESP_GATTS_CONNECT_EVT:
-      // start security connect with peer device when receive the connect event sent by the master.
+      ESP_LOGI(TAG, "GATTS_CONNECT_EVT - Starting encryption");
       esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
-      ESP_LOGD(TAG, "BLE device connected, starting encryption");
       break;    
     default:
+      ESP_LOGD(TAG, "Unhandled GATTS event: %d", event);
       break;
   }
 }
