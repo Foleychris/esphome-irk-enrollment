@@ -41,9 +41,18 @@ ESP_LOGCONFIG(TAG, "Setting up IRK Enrollment Component");
 // Set static instance for callbacks
 instance_ = this;
 
-// Register BLE event handlers
-esp_ble_gap_register_callback(IrkEnrollmentComponent::gap_event_handler);
-esp_ble_gatts_register_callback(IrkEnrollmentComponent::gatts_event_handler);
+ // Register BLE event handlers with error checking
+  esp_err_t gap_ret = esp_ble_gap_register_callback(IrkEnrollmentComponent::gap_event_handler);
+  if (gap_ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to register GAP callback: %s", esp_err_to_name(gap_ret));
+    return;
+  }
+
+  esp_err_t gatts_ret = esp_ble_gatts_register_callback(IrkEnrollmentComponent::gatts_event_handler);
+  if (gatts_ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to register GATTS callback: %s", esp_err_to_name(gatts_ret));
+    return;
+  }
 
 // Setup BLE security parameters
 this->setup_ble_security();
