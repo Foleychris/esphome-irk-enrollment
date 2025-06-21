@@ -114,13 +114,13 @@ float IrkEnrollmentComponent::get_setup_priority() const {
 }
 
 // Static callback wrappers
-static void IrkEnrollmentComponent::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
+void IrkEnrollmentComponent::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {
   if (instance_ != nullptr) {
     instance_->handle_gap_event(event, param);
   }
 }
 
-static void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
+void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
   if (instance_ != nullptr) {
     instance_->handle_gatts_event(event, gatts_if, param);
   }
