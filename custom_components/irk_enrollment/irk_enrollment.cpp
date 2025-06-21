@@ -79,7 +79,7 @@ ESP_LOGW(TAG, "We have %d bonds, where we expect to only ever have 0 or 1", dev_
 }
 
 if (dev_num == 0) {
-  ESP_LOGD(TAG, "No devices, returning");
+  //ESP_LOGD(TAG, "No devices, returning");
   return;  // No bonded devices
 }
 
