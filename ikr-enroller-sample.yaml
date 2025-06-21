@@ -1,0 +1,92 @@
+# Sample ESPHome configuration for IRK Enrollment
+# This demonstrates how to set up the BLE server with the necessary services
+
+esphome:
+  name: ikr-enroller
+  friendly_name: IKR Enroller
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Ikr-Enroller Fallback Hotspot"
+    password: !secret fallback_password
+
+captive_portal:
+
+# Enable BLE functionality
+esp32_ble:
+  advertising: true
+  scan_parameters:
+    active: true
+  advertising_parameters:
+    min_interval: 20ms  # 0x0020 in hex (faster advertising)
+    max_interval: 40ms  # 0x0040 in hex
+  # iOS-friendly configuration
+  manufacturer_data:
+    - manufacturer_id: 0xFFFF  # Generic manufacturer ID
+      data: [0x01, 0x02]
+  service_data:
+    - uuid: 0x180D  # Heart Rate Service
+      data: [0x00, 0x01]
+  service_uuids:
+    - 0x180D  # Heart Rate Service
+  appearance: 0x0341  # Heart Rate Sensor
+  security:
+    auth: BOND  # Enable bonding
+    io_capability: NO_INPUT_NO_OUTPUT
+    encryption: MITM  # Enable MITM protection
+
+# Enable BLE server functionality
+esp32_ble_server:
+  services:
+    - uuid: 0x180D  # Heart Rate Service
+      characteristics:
+        - uuid: 0x2A37  # Heart Rate Measurement
+          properties: READ | NOTIFY
+          value: "0600"  # Initial value (flags + heart rate)
+    
+    - uuid: 0x180A  # Device Information Service
+      characteristics:
+        - uuid: 0x2A29  # Manufacturer Name
+          properties: READ
+          value: "ESPHome"
+        - uuid: 0x2A24  # Model Number
+          properties: READ
+          value: "IRK Collector"
+
+# Add a text sensor to display the latest IRK
+text_sensor:
+  - platform: irk_enrollment
+    name: "Latest IRK"
+    icon: "mdi:cellphone-key"
+
+# Add a restart button
+switch:
+  - platform: restart
+    name: "Restart IKR Enroller"
+    icon: "mdi:restart"
+
+# Include the IRK enrollment component
+external_components:
+  - source: github://Foleychris/esphome-irk-enrollment@main
+    components: [irk_enrollment]

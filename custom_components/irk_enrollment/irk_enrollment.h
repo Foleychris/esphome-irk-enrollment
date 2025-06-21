@@ -2,61 +2,37 @@
 
 #include "esphome/core/defines.h"
 #include "esphome/core/component.h"
-#include "esphome/core/automation.h"
 #include "esphome/core/helpers.h"
-#include "esphome/core/preferences.h"
 #include "esphome/components/text_sensor/text_sensor.h"
 #include "esphome/components/esp32_ble/ble.h"
-#include "esphome/components/esp32_ble/ble_advertising.h"
-#include "esphome/components/esp32_ble/ble_uuid.h"
-#include "esphome/components/esp32_ble/queue.h"
-#include "esphome/components/esp32_ble_server/ble_service.h"
 #include "esphome/components/esp32_ble_server/ble_server.h"
-#include "esphome/components/esp32_ble_server/ble_characteristic.h"
 
 #ifdef USE_ESP32
 
 #include <esp_gap_ble_api.h>
-#include <esp_gatts_api.h>
+#include <esp_bt_defs.h>
 
 namespace esphome {
 namespace irk_enrollment {
 
 class IrkEnrollmentComponent : public esphome::Component {
 public:
-IrkEnrollmentComponent() {}
-void dump_config() override;
-void loop() override;
-void setup() override;
-void set_latest_irk(text_sensor::TextSensor *latest_irk) { latest_irk_ = latest_irk; }
-
-float get_setup_priority() const override;
-
-// BLE event handling methods
-void handle_gap_event(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
-void handle_gatts_event(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+  IrkEnrollmentComponent() {}
+  void dump_config() override;
+  void loop() override;
+  void setup() override;
+  void set_latest_irk(text_sensor::TextSensor *latest_irk) { latest_irk_ = latest_irk; }
+  
+  float get_setup_priority() const override;
 
 protected:
-text_sensor::TextSensor *latest_irk_{nullptr};
-
-// BLE service configuration
-void setup_ble_security();
-void setup_advertising();
-void setup_gatt_server();
-void process_bonded_devices();
-
-// GATT server attributes
-uint16_t device_info_handle_{0};
-uint16_t manufacturer_name_handle_{0};
-uint16_t model_number_handle_{0};
-uint16_t heart_rate_handle_{0};
-uint16_t heart_rate_measurement_handle_{0};
-
-// Static callback wrappers
-static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
-static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
-
-static IrkEnrollmentComponent *instance_;
+  text_sensor::TextSensor *latest_irk_{nullptr};
+  
+  // Process bonded devices to extract IRKs
+  void process_bonded_devices();
+  
+  // Reference to the BLE server component
+  esp32_ble_server::BLEServer *ble_server_{nullptr};
 };
 
 }  // namespace irk_enrollment

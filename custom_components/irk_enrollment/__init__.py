@@ -3,10 +3,10 @@ import esphome.config_validation as cv
 from esphome.components import esp32_ble_server, text_sensor
 from esphome.const import CONF_ID
 
-AUTO_LOAD = ["esp32_ble_server", "text_sensor"]
+AUTO_LOAD = ["esp32_ble", "esp32_ble_server", "text_sensor"]
 CODEOWNERS = ["@dgrnbrg"]
 CONFLICTS_WITH = ["esp32_ble_beacon"]
-DEPENDENCIES = ["esp32", "text_sensor"]
+DEPENDENCIES = ["esp32", "esp32_ble", "esp32_ble_server", "text_sensor"]
 
 CONF_LATEST_IRK = "latest_irk"
 
