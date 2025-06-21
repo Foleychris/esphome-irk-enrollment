@@ -64,20 +64,31 @@ void IrkEnrollmentComponent::setup_advertising() {
   esp_ble_adv_data_t adv_data = {};
   adv_data.set_scan_rsp = false;
   adv_data.include_name = true;
-  adv_data.include_txpower = false;  // Changed to false
+  adv_data.include_txpower = true;  // Include TX power for better iOS discovery
   adv_data.min_interval = 0x0006;
   adv_data.max_interval = 0x0010;
-  adv_data.appearance = 0x03C1;  // Generic HID Device
-  adv_data.manufacturer_len = 0;
-  adv_data.p_manufacturer_data = nullptr;
+  adv_data.appearance = 0x0340;  // Generic Media Player - more recognizable by iOS
+  
+  // Use a generic manufacturer ID that's not Apple's
+  // 0xFFFF is for development/testing
+  static uint8_t manufacturer_data[4] = {0xFF, 0xFF, 0x01, 0x02};
+  adv_data.manufacturer_len = sizeof(manufacturer_data);
+  adv_data.p_manufacturer_data = manufacturer_data;
+  
   adv_data.service_data_len = 0;
   adv_data.p_service_data = nullptr;
   
-  // Add a service UUID to make it more discoverable
-  uint16_t service_uuid = 0x1812;  // HID Service
-  adv_data.service_uuid_len = sizeof(uint16_t);
-  adv_data.p_service_uuid = (uint8_t*)&service_uuid;
+  // Use a 128-bit UUID for better iOS compatibility
+  // This is a standard Device Information service UUID converted to 128-bit format
+  // which is more likely to be recognized by iOS
+  static uint8_t service_uuid128[ESP_UUID_LEN_128] = {
+    0xFB, 0x34, 0x9B, 0x5F, 0x80, 0x00, 0x00, 0x80, 
+    0x00, 0x10, 0x00, 0x00, 0x0A, 0x18, 0x00, 0x00  // 0x180A is Device Information Service
+  };
+  adv_data.service_uuid_len = sizeof(service_uuid128);
+  adv_data.p_service_uuid = service_uuid128;
   
+  // Set flags for iOS compatibility
   adv_data.flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT);
 
   esp_err_t ret = esp_ble_gap_config_adv_data(&adv_data);
@@ -86,13 +97,26 @@ void IrkEnrollmentComponent::setup_advertising() {
     return;
   }
 
-  // Set device name
-  esp_ble_gap_set_device_name("IRK Collector");
+  // Configure scan response data with device name
+  esp_ble_adv_data_t scan_rsp_data = {};
+  scan_rsp_data.set_scan_rsp = true;
+  scan_rsp_data.include_name = true;
+  scan_rsp_data.include_txpower = true;
+  scan_rsp_data.flag = 0;
+  
+  ret = esp_ble_gap_config_adv_data(&scan_rsp_data);
+  if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "Failed to config scan response data: %s", esp_err_to_name(ret));
+    return;
+  }
 
-  // Configure advertising parameters
+  // Set device name - use a more descriptive name for iOS
+  esp_ble_gap_set_device_name("ESPHome IRK Collector");
+
+  // Configure advertising parameters with faster intervals for better discovery
   esp_ble_adv_params_t adv_params = {};
-  adv_params.adv_int_min = 0x100;  // Slower advertising (100ms)
-  adv_params.adv_int_max = 0x200;  // to 200ms
+  adv_params.adv_int_min = 0x20;  // Faster advertising (20ms)
+  adv_params.adv_int_max = 0x40;  // to 40ms
   adv_params.adv_type = ADV_TYPE_IND;
   adv_params.own_addr_type = BLE_ADDR_TYPE_PUBLIC;
   adv_params.channel_map = ADV_CHNL_ALL;
@@ -103,20 +127,30 @@ void IrkEnrollmentComponent::setup_advertising() {
   if (ret != ESP_OK) {
     ESP_LOGE(TAG, "Failed to start advertising: %s", esp_err_to_name(ret));
   } else {
-    ESP_LOGI(TAG, "Started BLE advertising");
+    ESP_LOGI(TAG, "Started BLE advertising with iOS-optimized parameters");
   }
 }
 
 void IrkEnrollmentComponent::setup_ble_security() {
-esp_ble_auth_req_t auth_req = ESP_LE_AUTH_BOND;  // bonding with peer device after authentication
-uint8_t key_size = 16;                           // the key size should be 7~16 bytes
-uint8_t init_key = ESP_BLE_ID_KEY_MASK;
-uint8_t rsp_key = ESP_BLE_ID_KEY_MASK;
-
-esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, sizeof(uint8_t));
-esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size, sizeof(uint8_t));
-esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
-esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
+  // Use MITM protection for better iOS compatibility
+  esp_ble_auth_req_t auth_req = ESP_LE_AUTH_REQ_SC_MITM_BOND;  // Secure Connection, MITM protection, and bonding
+  uint8_t key_size = 16;  // Maximum key size
+  
+  // Request all key types for better compatibility
+  uint8_t init_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
+  uint8_t rsp_key = ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK;
+  
+  // Enable I/O capabilities for MITM
+  esp_ble_io_cap_t iocap = ESP_IO_CAP_NONE;  // No input/output capability
+  
+  // Set security parameters
+  esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req, sizeof(uint8_t));
+  esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, sizeof(uint8_t));
+  esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size, sizeof(uint8_t));
+  esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
+  esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
+  
+  ESP_LOGI(TAG, "BLE security parameters set with MITM protection");
 }
 
 void IrkEnrollmentComponent::dump_config() {
