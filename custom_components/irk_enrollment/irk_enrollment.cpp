@@ -1,7 +1,7 @@
-#include “irk_enrollment.h”
-#include “esphome/core/application.h”
-#include “esphome/core/log.h”
-#include “esphome/core/version.h”
+#include "irk_enrollment.h"
+#include "esphome/core/application.h"
+#include "esphome/core/log.h"
+#include "esphome/core/version.h"
 
 #ifdef USE_ESP32
 
@@ -17,7 +17,7 @@
 namespace esphome {
 namespace irk_enrollment {
 
-static const char *const TAG = “irk_enrollment.component”;
+static const char *const TAG = "irk_enrollment.component";
 
 // Static instance pointer for callbacks
 IrkEnrollmentComponent *IrkEnrollmentComponent::instance_ = nullptr;
@@ -35,7 +35,7 @@ return s;
 }
 
 void IrkEnrollmentComponent::setup() {
-ESP_LOGCONFIG(TAG, “Setting up IRK Enrollment Component”);
+ESP_LOGCONFIG(TAG, "Setting up IRK Enrollment Component");
 
 // Set static instance for callbacks
 instance_ = this;
@@ -63,8 +63,8 @@ esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t)
 }
 
 void IrkEnrollmentComponent::dump_config() {
-ESP_LOGCONFIG(TAG, “ESP32 IRK Enrollment:”);
-LOG_TEXT_SENSOR(” “, “Latest IRK”, this->latest_irk_);
+ESP_LOGCONFIG(TAG, "ESP32 IRK Enrollment:");
+LOG_TEXT_SENSOR(" ", "Latest IRK", this->latest_irk_);
 }
 
 void IrkEnrollmentComponent::loop() {
@@ -74,7 +74,7 @@ this->process_bonded_devices();
 void IrkEnrollmentComponent::process_bonded_devices() {
 int dev_num = esp_ble_get_bond_device_num();
 if (dev_num > 1) {
-ESP_LOGW(TAG, “We have %d bonds, where we expect to only ever have 0 or 1”, dev_num);
+ESP_LOGW(TAG, "We have %d bonds, where we expect to only ever have 0 or 1", dev_num);
 }
 
 if (dev_num == 0) {
@@ -85,7 +85,7 @@ esp_ble_bond_dev_t bond_devs[dev_num];
 esp_ble_get_bond_device_list(&dev_num, bond_devs);
 
 for (int i = 0; i < dev_num; i++) {
-ESP_LOGI(TAG, “    remote BD_ADDR: %08x%04x”,
+ESP_LOGI(TAG, "    remote BD_ADDR: %08x%04x",
 (bond_devs[i].bd_addr[0] << 24) + (bond_devs[i].bd_addr[1] << 16) +
 (bond_devs[i].bd_addr[2] << 8) + bond_devs[i].bd_addr[3],
 (bond_devs[i].bd_addr[4] << 8) + bond_devs[i].bd_addr[5]);
@@ -128,7 +128,7 @@ void IrkEnrollmentComponent::handle_gap_event(esp_gap_ble_cb_event_t event, esp_
 switch (event) {
 case ESP_GAP_BLE_KEY_EVT:
 // shows the ble key info share with peer device to the user.
-// ESP_LOGI(TAG, “key type = %s”, esp_key_type_to_str(param->ble_security.ble_key.key_type));
+// ESP_LOGI(TAG, "key type = %s", esp_key_type_to_str(param->ble_security.ble_key.key_type));
 break;
 case ESP_GAP_BLE_SEC_REQ_EVT:
 esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
@@ -148,7 +148,7 @@ switch (event) {
 case ESP_GATTS_CONNECT_EVT:
 // start security connect with peer device when receive the connect event sent by the master.
 esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
-ESP_LOGD(TAG, “BLE device connected, starting encryption”);
+ESP_LOGD(TAG, "BLE device connected, starting encryption");
 break;
 default:
 break;

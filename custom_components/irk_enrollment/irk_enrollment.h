@@ -1,11 +1,11 @@
 #pragma once
 
-#include “esphome/core/defines.h”
-#include “esphome/core/component.h”
-#include “esphome/core/automation.h”
-#include “esphome/core/helpers.h”
-#include “esphome/core/preferences.h”
-#include “esphome/components/text_sensor/text_sensor.h”
+#include "esphome/core/defines.h"
+#include "esphome/core/component.h"
+#include "esphome/core/automation.h"
+#include "esphome/core/helpers.h"
+#include "esphome/core/preferences.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 
 #ifdef USE_ESP32
 
