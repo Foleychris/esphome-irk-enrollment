@@ -35,6 +35,8 @@ CONFIG_SCHEMA = (
     )
     .extend(cv.COMPONENT_SCHEMA)
 )
+
+import logging
 LOGGER = logging.getLogger(__name__)
 
 async def to_code(config):
