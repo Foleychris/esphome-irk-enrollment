@@ -93,6 +93,13 @@ void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp
 		esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
 		//ESP_LOGD(TAG, "  connect evt");
 		break;
+    default:
+		//ESP_LOGD(TAG, "  other evt");
+        break;
+	}
+	}
+  virtual void 	IrkEnrollmentComponent::gap_event_handler (esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
+  switch (event) {
 	case ESP_GAP_BLE_KEY_EVT:
 		//shows the ble key info share with peer device to the user.
 		//ESP_LOGI(TAG, "key type = %s", esp_key_type_to_str(param->ble_security.ble_key.key_type));
@@ -118,7 +125,6 @@ void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp
     default:
 		//ESP_LOGD(TAG, "  other evt");
         break;
-	}
 	}
 }
 
