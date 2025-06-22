@@ -7,7 +7,7 @@ from esphome.components.esp32 import add_idf_sdkconfig_option
 AUTO_LOAD = ["esp32_ble_server", "text_sensor"]
 CODEOWNERS = ["@dgrnbrg"]
 CONFLICTS_WITH = ["esp32_ble_beacon"]
-DEPENDENCIES = ["esp32", "text_sensor"]
+DEPENDENCIES = ["esp32","esp32_ble_server", "text_sensor"]
 
 CONF_BLE_SERVER_ID = "ble_server_id"
 CONF_LATEST_IRK = "latest_irk"
@@ -17,7 +17,7 @@ irk_enrollment_ns = cg.esphome_ns.namespace("irk_enrollment")
 IrkEnrollmentComponent = irk_enrollment_ns.class_("IrkEnrollmentComponent",
     cg.Component,
     esp32_ble.GATTsEventHandler,
-    esp32_ble_server.BLEServiceComponent,
+//    esp32_ble_server.BLEServiceComponent,
 )
 
 CONFIG_SCHEMA = (
