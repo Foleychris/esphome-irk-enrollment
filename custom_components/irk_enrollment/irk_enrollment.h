@@ -28,7 +28,7 @@ class IrkEnrollmentComponent :
 	public esphome::Component,
 	//public esp32_ble_server::BLEServer,
 	public esp32_ble::GATTsEventHandler,
-    public esp32_ble::GAPEventHandler
+  public esp32_ble::GAPEventHandler
 	{
  public:
   IrkEnrollmentComponent() {}
@@ -41,7 +41,7 @@ class IrkEnrollmentComponent :
   float get_setup_priority() const;
     void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
                            esp_ble_gatts_cb_param_t *param) override;
-  virtual void 	gap_event_handler (esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) override;
+   void	gap_event_handler (esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) override;
 
   void start();
   void stop();
