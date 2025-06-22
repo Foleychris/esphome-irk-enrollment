@@ -87,7 +87,7 @@ float IrkEnrollmentComponent::get_setup_priority() const { return setup_priority
 
 void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
 		esp_ble_gatts_cb_param_t *param) {
-	//ESP_LOGD(TAG, "in gatts event handler");
+	ESP_LOGD(TAG, "in gatts event handler");
 	switch (event) {
 	case ESP_GATTS_CONNECT_EVT:
 		//start security connect with peer device when receive the connect event sent by the master.
@@ -100,6 +100,7 @@ void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp
 	}
 	}
   void 	IrkEnrollmentComponent::gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){
+  ESP_LOGD(TAG, "Entered gap event handler");
   switch (event) {
 	case ESP_GAP_BLE_KEY_EVT:
 		//shows the ble key info share with peer device to the user.
