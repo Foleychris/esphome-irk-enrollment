@@ -41,7 +41,7 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     ble_server = await cg.get_variable(config[CONF_BLE_SERVER_ID])
-    cg.add(ble_server.register_service_component(var))
+    #cg.add(ble_server.register_service_component(var))
 
     ble_master = await cg.get_variable(config[esp32_ble.CONF_BLE_ID])
     cg.add(ble_master.register_gatts_event_handler(var))
