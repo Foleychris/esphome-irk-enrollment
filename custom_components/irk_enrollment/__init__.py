@@ -35,7 +35,7 @@ CONFIG_SCHEMA = (
     )
     .extend(cv.COMPONENT_SCHEMA)
 )
-
+LOGGER = logging.getLogger(__name__)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
@@ -47,7 +47,7 @@ async def to_code(config):
     ble_master = await cg.get_variable(config[esp32_ble.CONF_BLE_ID])
     cg.add(ble_master.register_gatts_event_handler(var))
     cg.add(ble_master.register_gap_event_handler(var))
-
+    LOGGER.info("well at least i was called...")
 
     if CONF_LATEST_IRK in config:
         latest_irk = await text_sensor.new_text_sensor(config[CONF_LATEST_IRK])
