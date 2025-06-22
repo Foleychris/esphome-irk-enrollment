@@ -108,6 +108,7 @@ void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp
 		//ESP_LOGD(TAG, "  ble key evt");
 		break;
     case ESP_GAP_BLE_SEC_REQ_EVT:
+        ESP_LOGD(TAG, "sending gap security response");
         esp_ble_gap_security_rsp(param->ble_security.ble_req.bd_addr, true);
         break;        
 	case ESP_GAP_BLE_AUTH_CMPL_EVT: {
