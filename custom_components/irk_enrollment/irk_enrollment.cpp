@@ -92,7 +92,7 @@ void IrkEnrollmentComponent::gatts_event_handler(esp_gatts_cb_event_t event, esp
 	case ESP_GATTS_CONNECT_EVT:
 		//start security connect with peer device when receive the connect event sent by the master.
 		esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
-		//ESP_LOGD(TAG, "  connect evt");
+		ESP_LOGD(TAG, "  connect evt");
 		break;
     default:
 		//ESP_LOGD(TAG, "  other evt");
